@@ -103,6 +103,7 @@ from ccxt.async_support.coingi import coingi                              # noqa
 from ccxt.async_support.coinmarketcap import coinmarketcap                # noqa: F401
 from ccxt.async_support.coinmate import coinmate                          # noqa: F401
 from ccxt.async_support.coinone import coinone                            # noqa: F401
+from ccxt.async_support.coinsbit import coinsbit                          # noqa: F401
 from ccxt.async_support.coinspot import coinspot                          # noqa: F401
 from ccxt.async_support.cointiger import cointiger                        # noqa: F401
 from ccxt.async_support.coolcoin import coolcoin                          # noqa: F401
@@ -151,6 +152,7 @@ from ccxt.async_support.okcoincny import okcoincny                        # noqa
 from ccxt.async_support.okcoinusd import okcoinusd                        # noqa: F401
 from ccxt.async_support.okex import okex                                  # noqa: F401
 from ccxt.async_support.okex3 import okex3                                # noqa: F401
+from ccxt.async_support.p2pb2b import p2pb2b                              # noqa: F401
 from ccxt.async_support.paymium import paymium                            # noqa: F401
 from ccxt.async_support.poloniex import poloniex                          # noqa: F401
 from ccxt.async_support.rightbtc import rightbtc                          # noqa: F401
@@ -229,6 +231,7 @@ exchanges = [
     'coinmarketcap',
     'coinmate',
     'coinone',
+    'coinsbit',
     'coinspot',
     'cointiger',
     'coolcoin',
@@ -277,6 +280,7 @@ exchanges = [
     'okcoinusd',
     'okex',
     'okex3',
+    'p2pb2b',
     'paymium',
     'poloniex',
     'rightbtc',

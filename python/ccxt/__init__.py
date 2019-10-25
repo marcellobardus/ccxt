@@ -122,6 +122,7 @@ from ccxt.coingi import coingi                              # noqa: F401
 from ccxt.coinmarketcap import coinmarketcap                # noqa: F401
 from ccxt.coinmate import coinmate                          # noqa: F401
 from ccxt.coinone import coinone                            # noqa: F401
+from ccxt.coinsbit import coinsbit                          # noqa: F401
 from ccxt.coinspot import coinspot                          # noqa: F401
 from ccxt.cointiger import cointiger                        # noqa: F401
 from ccxt.coolcoin import coolcoin                          # noqa: F401
@@ -170,6 +171,7 @@ from ccxt.okcoincny import okcoincny                        # noqa: F401
 from ccxt.okcoinusd import okcoinusd                        # noqa: F401
 from ccxt.okex import okex                                  # noqa: F401
 from ccxt.okex3 import okex3                                # noqa: F401
+from ccxt.p2pb2b import p2pb2b                              # noqa: F401
 from ccxt.paymium import paymium                            # noqa: F401
 from ccxt.poloniex import poloniex                          # noqa: F401
 from ccxt.rightbtc import rightbtc                          # noqa: F401
@@ -248,6 +250,7 @@ exchanges = [
     'coinmarketcap',
     'coinmate',
     'coinone',
+    'coinsbit',
     'coinspot',
     'cointiger',
     'coolcoin',
@@ -296,6 +299,7 @@ exchanges = [
     'okcoinusd',
     'okex',
     'okex3',
+    'p2pb2b',
     'paymium',
     'poloniex',
     'rightbtc',
