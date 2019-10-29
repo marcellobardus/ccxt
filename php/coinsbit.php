@@ -21,7 +21,7 @@ class coinsbit extends Exchange {
                 'fetchOrder' => true,
                 'fetchOrders' => true,
                 'fetchCurrencies' => false,
-                'fetchTicker' => false,
+                'fetchTicker' => true,
                 'fetchTickers' => false,
                 'fetchOHLCV' => false,
                 'fetchTrades' => false,
@@ -123,6 +123,39 @@ class coinsbit extends Exchange {
             );
         }
         return $result;
+    }
+
+    public function fetch_ticker ($symbol, $params = array ()) {
+        $this->load_markets();
+        $timestamp = $this->seconds ();
+        $market = $this->market ($symbol);
+        $request = array_merge (array (
+            'market' => $market['id'],
+        ), $params);
+        $response = $this->publicGetTicker ($request);
+        $ticker = $this->safe_value($response, 'result');
+        return array (
+            'symbol' => $symbol,
+            'timestamp' => $timestamp,
+            'datetime' => $this->iso8601 ($timestamp),
+            'high' => $this->safe_float($ticker, 'high'),
+            'low' => $this->safe_float($ticker, 'low'),
+            'bid' => $this->safe_float($ticker, 'bid'),
+            'bidVolume' => null,
+            'ask' => $this->safe_float($ticker, 'ask'),
+            'askVolume' => null,
+            'vwap' => null,
+            'previousClose' => null,
+            'open' => $this->safe_float($ticker, 'open'),
+            'close' => $this->safe_float($ticker, 'last'),
+            'last' => $this->safe_float($ticker, 'last'),
+            'percentage' => null,
+            'change' => $this->safe_float($ticker, 'change'),
+            'average' => null,
+            'baseVolume' => $this->safe_float($ticker, 'volume'),
+            'quoteVolume' => $this->safe_float($ticker, 'deal'),
+            'info' => $ticker,
+        );
     }
 
     public function create_order ($symbol, $type, $side, $amount, $price = null, $params = array ()) {

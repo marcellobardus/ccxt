@@ -29,7 +29,7 @@ class coinsbit (Exchange):
                 'fetchOrder': True,
                 'fetchOrders': True,
                 'fetchCurrencies': False,
-                'fetchTicker': False,
+                'fetchTicker': True,
                 'fetchTickers': False,
                 'fetchOHLCV': False,
                 'fetchTrades': False,
@@ -128,6 +128,38 @@ class coinsbit (Exchange):
                 'info': market,
             })
         return result
+
+    def fetch_ticker(self, symbol, params={}):
+        self.load_markets()
+        timestamp = self.seconds()
+        market = self.market(symbol)
+        request = self.extend({
+            'market': market['id'],
+        }, params)
+        response = self.publicGetTicker(request)
+        ticker = self.safe_value(response, 'result')
+        return {
+            'symbol': symbol,
+            'timestamp': timestamp,
+            'datetime': self.iso8601(timestamp),
+            'high': self.safe_float(ticker, 'high'),
+            'low': self.safe_float(ticker, 'low'),
+            'bid': self.safe_float(ticker, 'bid'),
+            'bidVolume': None,
+            'ask': self.safe_float(ticker, 'ask'),
+            'askVolume': None,
+            'vwap': None,
+            'previousClose': None,
+            'open': self.safe_float(ticker, 'open'),
+            'close': self.safe_float(ticker, 'last'),
+            'last': self.safe_float(ticker, 'last'),
+            'percentage': None,
+            'change': self.safe_float(ticker, 'change'),
+            'average': None,
+            'baseVolume': self.safe_float(ticker, 'volume'),
+            'quoteVolume': self.safe_float(ticker, 'deal'),
+            'info': ticker,
+        }
 
     def create_order(self, symbol, type, side, amount, price=None, params={}):
         self.load_markets()
