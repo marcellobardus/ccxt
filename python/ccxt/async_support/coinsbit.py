@@ -172,7 +172,7 @@ class coinsbit (Exchange):
             'price': self.price_to_precision(symbol, price),
         }
         response = await getattr(self, method)(self.extend(request, params))
-        order = self.parse_new_order(response.result, market)
+        order = self.parse_new_order(self.safe_value(response, 'result'), market)
         return order
 
     async def cancel_order(self, id, symbol=None, params={}):

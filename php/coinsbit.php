@@ -169,7 +169,7 @@ class coinsbit extends Exchange {
             'price' => $this->price_to_precision($symbol, $price),
         );
         $response = $this->$method (array_merge ($request, $params));
-        $order = $this->parse_new_order ($response->result, $market);
+        $order = $this->parse_new_order ($this->safe_value($response, 'result'), $market);
         return $order;
     }
 
