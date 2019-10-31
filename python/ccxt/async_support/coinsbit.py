@@ -98,8 +98,8 @@ class coinsbit (Exchange):
             quote = self.safe_currency_code(quoteId)
             symbol = base + '/' + quote
             precision = {
-                'amount': self.safe_float(market, 'stockPrec'),
-                'price': self.safe_float(market, 'moneyPrec'),
+                'amount': self.safe_integer(market, 'stockPrec'),
+                'price': self.safe_integer(market, 'moneyPrec'),
             }
             minAmount = self.safe_float(market, 'minAmount', 0)
             result.append({

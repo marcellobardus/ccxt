@@ -92,8 +92,8 @@ class coinsbit extends Exchange {
             $quote = $this->safe_currency_code($quoteId);
             $symbol = $base . '/' . $quote;
             $precision = array (
-                'amount' => $this->safe_float($market, 'stockPrec'),
-                'price' => $this->safe_float($market, 'moneyPrec'),
+                'amount' => $this->safe_integer($market, 'stockPrec'),
+                'price' => $this->safe_integer($market, 'moneyPrec'),
             );
             $minAmount = $this->safe_float($market, 'minAmount', 0);
             $result[] = array (
