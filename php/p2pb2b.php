@@ -165,7 +165,7 @@ class p2pb2b extends Exchange {
 
     public function fetch_ticker ($symbol, $params = array ()) {
         $this->load_markets();
-        $timestamp = $this->seconds ();
+        $timestamp = $this->milliseconds ();
         $market = $this->market ($symbol);
         $request = array_merge (array (
             'market' => $market['id'],

@@ -169,7 +169,7 @@ class p2pb2b (Exchange):
 
     async def fetch_ticker(self, symbol, params={}):
         await self.load_markets()
-        timestamp = self.seconds()
+        timestamp = self.milliseconds()
         market = self.market(symbol)
         request = self.extend({
             'market': market['id'],
