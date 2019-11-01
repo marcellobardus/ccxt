@@ -195,8 +195,7 @@ class coinsbit (Exchange):
         if limit is not None:
             request['limit'] = limit
         response = self.privatePostOrders(self.extend(request, params))
-        result = response.result.result
-        return self.parse_orders(result, market, since, limit)
+        return self.parse_orders(self.safe_value(response, 'result'), market, since, limit)
 
     def fetch_order(self, id, symbol=None, params={}):
         self.load_markets()
