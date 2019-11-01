@@ -282,7 +282,7 @@ class coinsbit extends Exchange {
         $symbol = $this->safe_string($market, 'symbol');
         $timestamp = $this->safe_string($order, 'timestamp');
         if ($timestamp !== null) {
-            $timestamp = (int) round($timestamp * 1000);
+            $timestamp = (int) round(floatval ($timestamp) * 1000);
         }
         $amount = $this->safe_float($order, 'amount');
         $remaining = $this->safe_float($order, 'left');
@@ -312,7 +312,7 @@ class coinsbit extends Exchange {
         $symbol = $this->safe_string($market, 'symbol');
         $timestamp = $this->safe_string($order, 'time') || $this->safe_string($order, 'timestamp');
         if ($timestamp !== null) {
-            $timestamp = (int) round($timestamp * 1000);
+            $timestamp = (int) round(floatval ($timestamp) * 1000);
         }
         $amount = $this->safe_float($order, 'amount');
         $fillAmount = $this->safe_float($order, 'dealStock', $amount);

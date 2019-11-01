@@ -270,7 +270,7 @@ class coinsbit (Exchange):
         symbol = self.safe_string(market, 'symbol')
         timestamp = self.safe_string(order, 'timestamp')
         if timestamp is not None:
-            timestamp = int(round(timestamp * 1000))
+            timestamp = int(round(float(timestamp)) * 1000)
         amount = self.safe_float(order, 'amount')
         remaining = self.safe_float(order, 'left')
         fillAmount = amount - remaining
@@ -298,7 +298,7 @@ class coinsbit (Exchange):
         symbol = self.safe_string(market, 'symbol')
         timestamp = self.safe_string(order, 'time') or self.safe_string(order, 'timestamp')
         if timestamp is not None:
-            timestamp = int(round(timestamp * 1000))
+            timestamp = int(round(float(timestamp)) * 1000)
         amount = self.safe_float(order, 'amount')
         fillAmount = self.safe_float(order, 'dealStock', amount)
         remaining = amount - fillAmount
