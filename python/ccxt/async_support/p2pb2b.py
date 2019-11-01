@@ -334,7 +334,7 @@ class p2pb2b (Exchange):
         symbol = self.safe_string(market, 'symbol')
         timestamp = self.safe_string(order, 'time')
         if timestamp is not None:
-            timestamp = int(timestamp) * 1000
+            timestamp = int(round(timestamp * 1000))
         amount = self.safe_float(order, 'amount')
         fillAmount = self.safe_float(order, 'dealStock', amount)
         remaining = amount - fillAmount
