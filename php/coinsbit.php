@@ -19,7 +19,8 @@ class coinsbit extends Exchange {
             'has' => array (
                 'createMarketOrder' => false,
                 'fetchOrder' => true,
-                'fetchOrders' => true,
+                'fetchOrders' => false,
+                'fetchOpenOrders' => true,
                 'fetchCurrencies' => false,
                 'fetchTicker' => true,
                 'fetchTickers' => false,
@@ -182,7 +183,7 @@ class coinsbit extends Exchange {
         return $this->privatePostOrderCancel (array_merge ($request, $params));
     }
 
-    public function fetch_orders ($symbol = null, $since = null, $limit = null, $params = array ()) {
+    public function fetch_open_orders ($symbol = null, $since = null, $limit = null, $params = array ()) {
         if ($symbol === null) {
             throw new ArgumentsRequired($this->id . ' fetchOrders requires a $symbol argument');
         }

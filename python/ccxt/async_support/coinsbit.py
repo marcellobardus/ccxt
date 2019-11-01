@@ -27,7 +27,8 @@ class coinsbit (Exchange):
             'has': {
                 'createMarketOrder': False,
                 'fetchOrder': True,
-                'fetchOrders': True,
+                'fetchOrders': False,
+                'fetchOpenOrders': True,
                 'fetchCurrencies': False,
                 'fetchTicker': True,
                 'fetchTickers': False,
@@ -183,7 +184,7 @@ class coinsbit (Exchange):
         }
         return await self.privatePostOrderCancel(self.extend(request, params))
 
-    async def fetch_orders(self, symbol=None, since=None, limit=None, params={}):
+    async def fetch_open_orders(self, symbol=None, since=None, limit=None, params={}):
         if symbol is None:
             raise ArgumentsRequired(self.id + ' fetchOrders requires a symbol argument')
         await self.load_markets()
