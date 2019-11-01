@@ -317,7 +317,7 @@ class p2pb2b extends Exchange {
         $symbol = $this->safe_string($market, 'symbol');
         $timestamp = $this->safe_string($order, 'timestamp');
         if ($timestamp !== null) {
-            $timestamp = intval ($timestamp) * 1000;
+            $timestamp = (int) round($timestamp * 1000);
         }
         $amount = $this->safe_float($order, 'amount');
         $remaining = $this->safe_float($order, 'left');
