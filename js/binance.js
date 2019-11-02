@@ -165,6 +165,7 @@ module.exports = class binance extends Exchange {
                         'balance',
                         'positionRisk',
                         'userTrades',
+                        'income',
                     ],
                     'post': [
                         'order',
