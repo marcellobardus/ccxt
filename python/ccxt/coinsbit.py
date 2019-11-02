@@ -332,8 +332,6 @@ class coinsbit (Exchange):
                 success = self.safe_value(response, 'success', True)
                 errorMessage = self.safe_value(response, 'message', [[]])
                 if not success and errorMessage:
-                    print('CCXT ERROR')
-                    print(errorMessage)
                     messageKey = list(errorMessage.keys())[0]
                     message = errorMessage[messageKey][0]
                     exceptionMessages = list(self.exceptions.keys())
