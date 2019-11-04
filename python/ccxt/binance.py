@@ -177,6 +177,7 @@ class binance (Exchange):
                         'balance',
                         'positionRisk',
                         'userTrades',
+                        'income',
                     ],
                     'post': [
                         'order',
