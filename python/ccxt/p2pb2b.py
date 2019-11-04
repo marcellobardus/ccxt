@@ -115,6 +115,7 @@ class p2pb2b (Exchange):
             },
             'exceptions': {
                 'Balance not enough': InsufficientFunds,
+                'amount is less than': InvalidOrder,
                 'Total is less than': InvalidOrder,
                 'Order not found': OrderNotFound,
                 'Unauthorized request.': AuthenticationError,
@@ -367,6 +368,9 @@ class p2pb2b (Exchange):
                 success = self.safe_value(response, 'success', True)
                 errorMessage = self.safe_value(response, 'message', [[]])
                 if not success and errorMessage:
+                    if isinstance(errorMessage, list):
+                        message = str(errorMessage)
+                        raise ExchangeError(self.id + ' Error ' + message)
                     messageKey = list(errorMessage.keys())[0]
                     message = errorMessage[messageKey][0]
                     exceptionMessages = list(self.exceptions.keys())
@@ -375,6 +379,7 @@ class p2pb2b (Exchange):
                         if message.find(exceptionMessage) >= 0:
                             ExceptionClass = self.exceptions[exceptionMessage]
                             raise ExceptionClass(self.id + ' ' + message)
+                    raise ExchangeError(self.id + ' Error ' + message)
         if code >= 400 or self.safe_value(response, 'status', 200) >= 400:
             if body.find('Server Error') >= 0:
                 raise ExchangeError(self.id + ' Server Error')

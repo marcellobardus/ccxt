@@ -78,8 +78,9 @@ class coinsbit (Exchange):
             },
             'exceptions': {
                 'balance not enough': InsufficientFunds,
+                'amount is less than': InvalidOrder,
                 'Total is less than': InvalidOrder,
-                'This action is unauthorized': AuthenticationError,
+                'This action is unauthorized.': AuthenticationError,
             },
         })
 
@@ -332,6 +333,9 @@ class coinsbit (Exchange):
                 success = self.safe_value(response, 'success', True)
                 errorMessage = self.safe_value(response, 'message', [[]])
                 if not success and errorMessage:
+                    if isinstance(errorMessage, list):
+                        message = str(errorMessage)
+                        raise ExchangeError(self.id + ' Error ' + message)
                     messageKey = list(errorMessage.keys())[0]
                     message = errorMessage[messageKey][0]
                     exceptionMessages = list(self.exceptions.keys())
@@ -340,3 +344,4 @@ class coinsbit (Exchange):
                         if message.find(exceptionMessage) >= 0:
                             ExceptionClass = self.exceptions[exceptionMessage]
                             raise ExceptionClass(self.id + ' ' + message)
+                    raise ExchangeError(self.id + ' Error ' + message)
