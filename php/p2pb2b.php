@@ -272,12 +272,11 @@ class p2pb2b extends Exchange {
         $result = array( 'info' => $balances );
         for ($i = 0; $i < count ($symbols); $i++) {
             $currencyId = $symbols[$i];
-            $code = $this->safe_currency_code($currencyId);
-            $balance = $balances[$code];
+            $balance = $balances[$currencyId];
             $account = $this->account ();
             $account['free'] = $this->safe_float($balance, 'available');
             $account['total'] = $this->safe_float($balance, 'available') . $this->safe_float($balance, 'freeze');
-            $result[$code] = $account;
+            $result[$currencyId] = $account;
         }
         return $this->parse_balance($result);
     }

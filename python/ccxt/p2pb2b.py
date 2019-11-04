@@ -266,12 +266,11 @@ class p2pb2b (Exchange):
         result = {'info': balances}
         for i in range(0, len(symbols)):
             currencyId = symbols[i]
-            code = self.safe_currency_code(currencyId)
-            balance = balances[code]
+            balance = balances[currencyId]
             account = self.account()
             account['free'] = self.safe_float(balance, 'available')
             account['total'] = self.safe_float(balance, 'available') + self.safe_float(balance, 'freeze')
-            result[code] = account
+            result[currencyId] = account
         return self.parse_balance(result)
 
     def sign(self, path, api='public', method='GET', params={}, headers=None, body=None):
