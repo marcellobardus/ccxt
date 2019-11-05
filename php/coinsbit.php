@@ -117,7 +117,7 @@ class coinsbit extends Exchange {
                         'max' => null,
                     ),
                     'cost' => array (
-                        'min' => pow(10, -$precision['amount']),
+                        'min' => null,
                         'max' => null,
                     ),
                 ),

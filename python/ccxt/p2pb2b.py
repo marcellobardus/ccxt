@@ -161,7 +161,7 @@ class p2pb2b (Exchange):
                         'max': None,
                     },
                     'cost': {
-                        'min': math.pow(10, -precision['amount']),
+                        'min': None,
                         'max': None,
                     },
                 },
