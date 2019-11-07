@@ -70,6 +70,7 @@ class binance(Exchange):
                     'web': 'https://www.binance.com',
                     'wapi': 'https://api.binance.com/wapi/v3',
                     'sapi': 'https://api.binance.com/sapi/v1',
+                    'fapiPublic': 'https://fapi.binance.com/fapi/v1',
                     'fapiPrivate': 'https://fapi.binance.com/fapi/v1',
                     'public': 'https://api.binance.com/api/v1',
                     'private': 'https://api.binance.com/api/v3',
@@ -151,6 +152,22 @@ class binance(Exchange):
                         'sub-account/assets',
                     ],
                 },
+                'fapiPublic': {
+                    'get': [
+                        'ping',
+                        'time',
+                        'exchangeInfo',
+                        'depth',
+                        'trades',
+                        'historicalTrades',
+                        'aggTrades',
+                        'klines',
+                        'premiumIndex',
+                        'ticker/24hr',
+                        'ticker/price',
+                        'ticker/bookTicker',
+                    ],
+                },
                 'fapiPrivate': {
                     'get': [
                         'allOrders',
@@ -163,6 +180,7 @@ class binance(Exchange):
                     ],
                     'post': [
                         'order',
+                        'leverage',
                     ],
                     'delete': [
                         'order',
@@ -234,6 +252,7 @@ class binance(Exchange):
                 'fetchTickersMethod': 'publicGetTicker24hr',
                 'defaultTimeInForce': 'GTC',  # 'GTC' = Good To Cancel(default), 'IOC' = Immediate Or Cancel
                 'defaultLimitOrderType': 'limit',  # or 'limit_maker'
+                'defaultMarket': 'spotMargin',  # 'spotMargin', 'futures'
                 'hasAlreadyAuthenticatedSuccessfully': False,
                 'warnOnFetchOpenOrdersWithoutSymbol': True,
                 'recvWindow': 5 * 1000,  # 5 sec, binance default
@@ -269,7 +288,11 @@ class binance(Exchange):
         return self.milliseconds() - self.options['timeDifference']
 
     async def fetch_time(self, params={}):
-        response = await self.publicGetTime(params)
+        marketType = self.options['defaultMarket']
+        method = 'PublicGetTime'
+        if marketType == 'futures':
+            method = 'fapiPublicGetTime'
+        response = await getattr(self, method)(params)
         return self.safe_float(response, 'serverTime')
 
     async def load_time_difference(self):
@@ -279,7 +302,11 @@ class binance(Exchange):
         return self.options['timeDifference']
 
     async def fetch_markets(self, params={}):
-        response = await self.publicGetExchangeInfo(params)
+        marketType = self.options['defaultMarket']
+        method = 'publicGetExchangeInfo'
+        if marketType == 'futures':
+            method = 'fapiPublicGetExchangeInfo'
+        response = await getattr(self, method)(params)
         if self.options['adjustForTimeDifference']:
             await self.load_time_difference()
         markets = self.safe_value(response, 'symbols')
@@ -377,17 +404,33 @@ class binance(Exchange):
 
     async def fetch_balance(self, params={}):
         await self.load_markets()
-        response = await self.privateGetAccount(params)
+        marketType = self.options['defaultMarket']
+        method = 'privateGetAccount'
+        if marketType == 'futures':
+            method = 'fapiPrivateGetAccount'
+        response = await getattr(self, method)(params)
         result = {'info': response}
-        balances = self.safe_value(response, 'balances', [])
-        for i in range(0, len(balances)):
-            balance = balances[i]
-            currencyId = balance['asset']
-            code = self.safe_currency_code(currencyId)
-            account = self.account()
-            account['free'] = self.safe_float(balance, 'free')
-            account['used'] = self.safe_float(balance, 'locked')
-            result[code] = account
+        if marketType == 'futures':
+            assets = self.safe_value(response, 'assets', [])
+            for i in range(0, len(assets)):
+                asset = assets[i]
+                currencyId = asset['asset']
+                code = self.safe_currency_code(currencyId)
+                account = self.account()
+                account['used'] = self.safe_float(asset, 'initialMargin')
+                account['total'] = self.safe_float(asset, 'marginBalance')
+                account['free'] = account['total'] - account['used']
+                result[code] = account
+        else:
+            balances = self.safe_value(response, 'balances', [])
+            for i in range(0, len(balances)):
+                balance = balances[i]
+                currencyId = balance['asset']
+                code = self.safe_currency_code(currencyId)
+                account = self.account()
+                account['free'] = self.safe_float(balance, 'free')
+                account['used'] = self.safe_float(balance, 'locked')
+                result[code] = account
         return self.parse_balance(result)
 
     async def fetch_order_book(self, symbol, limit=None, params={}):
@@ -398,7 +441,11 @@ class binance(Exchange):
         }
         if limit is not None:
             request['limit'] = limit  # default = maximum = 100
-        response = await self.publicGetDepth(self.extend(request, params))
+        marketType = self.options['defaultMarket']
+        method = 'publicGetDepth'
+        if marketType == 'futures':
+            method = 'fapiPublicGetDepth'
+        response = await getattr(self, method)(self.extend(request, params))
         orderbook = self.parse_order_book(response)
         orderbook['nonce'] = self.safe_integer(response, 'lastUpdateId')
         return orderbook
@@ -447,7 +494,11 @@ class binance(Exchange):
         request = {
             'symbol': market['id'],
         }
-        response = await self.publicGetTicker24hr(self.extend(request, params))
+        marketType = self.options['defaultMarket']
+        method = 'publicGetTicker24hr'
+        if marketType == 'futures':
+            method = 'fapiPublicGetTicker24hr'
+        response = await getattr(self, method)(self.extend(request, params))
         return self.parse_ticker(response, market)
 
     def parse_tickers(self, rawTickers, symbols=None):
@@ -458,7 +509,11 @@ class binance(Exchange):
 
     async def fetch_bids_asks(self, symbols=None, params={}):
         await self.load_markets()
-        response = await self.publicGetTickerBookTicker(params)
+        marketType = self.options['defaultMarket']
+        method = 'publicGetTickerBookTicker'
+        if marketType == 'futures':
+            method = 'fapiPublicGetTickerBookTicker'
+        response = await getattr(self, method)(params)
         return self.parse_tickers(response, symbols)
 
     async def fetch_tickers(self, symbols=None, params={}):
@@ -488,7 +543,11 @@ class binance(Exchange):
             request['startTime'] = since
         if limit is not None:
             request['limit'] = limit  # default == max == 500
-        response = await self.publicGetKlines(self.extend(request, params))
+        marketType = self.options['defaultMarket']
+        method = 'publicGetKlines'
+        if marketType == 'futures':
+            method = 'fapiPublicGetKlines'
+        response = await getattr(self, method)(self.extend(request, params))
         return self.parse_ohlcvs(response, market, timeframe, since, limit)
 
     def parse_trade(self, trade, market=None):
@@ -539,6 +598,27 @@ class binance(Exchange):
         #         "isBestMatch": True
         #     }
         #
+        # futures trades
+        # https://binance-docs.github.io/apidocs/futures/en/#account-trade-list-user_data
+        #
+        #     {
+        #       "accountId": 20,
+        #       "buyer": False,
+        #       "commission": "-0.07819010",
+        #       "commissionAsset": "USDT",
+        #       "counterPartyId": 653,
+        #       "id": 698759,
+        #       "maker": False,
+        #       "orderId": 25851813,
+        #       "price": "7819.01",
+        #       "qty": "0.002",
+        #       "quoteQty": "0.01563",
+        #       "realizedPnl": "-0.91539999",
+        #       "side": "SELL",
+        #       "symbol": "BTCUSDT",
+        #       "time": 1569514978020
+        #     }
+        #
         timestamp = self.safe_integer_2(trade, 'T', 'time')
         price = self.safe_float_2(trade, 'p', 'price')
         amount = self.safe_float_2(trade, 'q', 'qty')
@@ -549,6 +629,8 @@ class binance(Exchange):
             side = 'sell' if trade['m'] else 'buy'  # self is reversed intentionally
         elif 'isBuyerMaker' in trade:
             side = 'sell' if trade['isBuyerMaker'] else 'buy'
+        elif 'side' in trade:
+            side = self.safe_string_lower(trade, 'side')
         else:
             if 'isBuyer' in trade:
                 side = 'buy' if trade['isBuyer'] else 'sell'  # self is a True side
@@ -665,7 +747,10 @@ class binance(Exchange):
         amount = self.safe_float(order, 'origQty')
         filled = self.safe_float(order, 'executedQty')
         remaining = None
-        cost = self.safe_float(order, 'cummulativeQuoteQty')
+        # - Spot/Margin market: cummulativeQuoteQty
+        # - Futures market: cumQuote.
+        #   Note self is not the actual cost, since Binance futures uses leverage to calculate margins.
+        cost = self.safe_float_2(order, 'cummulativeQuoteQty', 'cumQuote')
         if filled is not None:
             if amount is not None:
                 remaining = amount - filled
@@ -705,7 +790,7 @@ class binance(Exchange):
             if filled:
                 average = cost / filled
                 if self.options['parseOrderToPrecision']:
-                    average = float(self.price_to_precision(symbol, average))
+                    average = float(self.cost_to_precision(symbol, average))
             if self.options['parseOrderToPrecision']:
                 cost = float(self.cost_to_precision(symbol, cost))
         return {
@@ -730,22 +815,45 @@ class binance(Exchange):
 
     async def create_order(self, symbol, type, side, amount, price=None, params={}):
         await self.load_markets()
+        marketType = self.options['defaultMarket']
         market = self.market(symbol)
         # the next 5 lines are added to support for testing orders
         method = 'privatePostOrder'
-        test = self.safe_value(params, 'test', False)
-        if test:
-            method += 'Test'
-            params = self.omit(params, 'test')
+        if marketType == 'futures':
+            method = 'fapiPrivatePostOrder'
+        else:
+            test = self.safe_value(params, 'test', False)
+            if test:
+                method += 'Test'
+                params = self.omit(params, 'test')
         uppercaseType = type.upper()
-        newOrderRespType = self.safe_value(self.options['newOrderRespType'], type, 'RESULT')
+        marketOrderType = {
+            'spotMargin': [
+                'LIMIT',
+                'MARKET',
+                'STOP_LOSS',
+                'TAKE_PROFIT',
+                'STOP_LOSS_LIMIT',
+                'TAKE_PROFIT_LIMIT',
+                'LIMIT_MAKER',
+            ],
+            'futures': [
+                'LIMIT',
+                'MARKET',
+                'STOP',
+            ],
+        }
+        validOrderTypes = self.safe_value(marketOrderType, marketType, [])
+        if not self.in_array(uppercaseType, validOrderTypes):
+            raise InvalidOrder(self.id + ' ' + type + ' is not a valid order type in ' + marketType + ' market')
         request = {
             'symbol': market['id'],
             'quantity': self.amount_to_precision(symbol, amount),
             'type': uppercaseType,
             'side': side.upper(),
-            'newOrderRespType': newOrderRespType,  # 'ACK' for order id, 'RESULT' for full order or 'FULL' for order with fills
         }
+        if marketType == 'spotMargin':
+            request['newOrderRespType'] = self.safe_value(self.options['newOrderRespType'], type, 'RESULT')  # 'ACK' for order id, 'RESULT' for full order or 'FULL' for order with fills
         timeInForceIsRequired = False
         priceIsRequired = False
         stopPriceIsRequired = False
@@ -759,6 +867,9 @@ class binance(Exchange):
             priceIsRequired = True
             timeInForceIsRequired = True
         elif uppercaseType == 'LIMIT_MAKER':
+            priceIsRequired = True
+        elif uppercaseType == 'STOP':
+            stopPriceIsRequired = True
             priceIsRequired = True
         if priceIsRequired:
             if price is None:
@@ -781,15 +892,19 @@ class binance(Exchange):
             raise ArgumentsRequired(self.id + ' fetchOrder requires a symbol argument')
         await self.load_markets()
         market = self.market(symbol)
-        origClientOrderId = self.safe_value(params, 'origClientOrderId')
+        marketType = self.options['defaultMarket']
+        method = 'privateGetOrder'
+        if marketType == 'futures':
+            method = 'fapiPrivateGetOrder'
         request = {
             'symbol': market['id'],
         }
+        origClientOrderId = self.safe_value(params, 'origClientOrderId')
         if origClientOrderId is not None:
             request['origClientOrderId'] = origClientOrderId
         else:
             request['orderId'] = int(id)
-        response = await self.privateGetOrder(self.extend(request, params))
+        response = await getattr(self, method)(self.extend(request, params))
         return self.parse_order(response, market)
 
     async def fetch_orders(self, symbol=None, since=None, limit=None, params={}):
@@ -804,8 +919,13 @@ class binance(Exchange):
             request['startTime'] = since
         if limit is not None:
             request['limit'] = limit
-        response = await self.privateGetAllOrders(self.extend(request, params))
+        marketType = self.options['defaultMarket']
+        method = 'privateGetAllOrders'
+        if marketType == 'futures':
+            method = 'fapiPrivateGetAllOrders'
+        response = await getattr(self, method)(self.extend(request, params))
         #
+        #  Spot:
         #     [
         #         {
         #             "symbol": "LTCBTC",
@@ -827,6 +947,25 @@ class binance(Exchange):
         #         }
         #     ]
         #
+        #  Futures:
+        #     [
+        #         {
+        #             "symbol": "BTCUSDT",
+        #             "orderId": 1,
+        #             "clientOrderId": "myOrder1",
+        #             "price": "0.1",
+        #             "origQty": "1.0",
+        #             "executedQty": "1.0",
+        #             "cumQuote": "10.0",
+        #             "status": "NEW",
+        #             "timeInForce": "GTC",
+        #             "type": "LIMIT",
+        #             "side": "BUY",
+        #             "stopPrice": "0.0",
+        #             "updateTime": 1499827319559
+        #         }
+        #     ]
+        #
         return self.parse_orders(response, market, since, limit)
 
     async def fetch_open_orders(self, symbol=None, since=None, limit=None, params={}):
@@ -841,7 +980,11 @@ class binance(Exchange):
             numSymbols = len(symbols)
             fetchOpenOrdersRateLimit = int(numSymbols / 2)
             raise ExchangeError(self.id + ' fetchOpenOrders WARNING: fetching open orders without specifying a symbol is rate-limited to one call per ' + str(fetchOpenOrdersRateLimit) + ' seconds. Do not call self method frequently to avoid ban. Set ' + self.id + '.options["warnOnFetchOpenOrdersWithoutSymbol"] = False to suppress self warning message.')
-        response = await self.privateGetOpenOrders(self.extend(request, params))
+        marketType = self.options['defaultMarket']
+        method = 'privateGetOpenOrders'
+        if marketType == 'futures':
+            method = 'fapiPrivateGetOpenOrders'
+        response = await getattr(self, method)(self.extend(request, params))
         return self.parse_orders(response, market, since, limit)
 
     async def fetch_closed_orders(self, symbol=None, since=None, limit=None, params={}):
@@ -858,14 +1001,22 @@ class binance(Exchange):
             'orderId': int(id),
             # 'origClientOrderId': id,
         }
-        response = await self.privateDeleteOrder(self.extend(request, params))
+        marketType = self.options['defaultMarket']
+        method = 'privateDeleteOrder'
+        if marketType == 'futures':
+            method = 'fapiPrivateDeleteOrder'
+        response = await getattr(self, method)(self.extend(request, params))
         return self.parse_order(response)
 
     async def fetch_my_trades(self, symbol=None, since=None, limit=None, params={}):
         if symbol is None:
             raise ArgumentsRequired(self.id + ' fetchMyTrades requires a symbol argument')
         await self.load_markets()
+        marketType = self.options['defaultMarket']
         market = self.market(symbol)
+        method = 'privateGetMyTrades'
+        if marketType == 'futures':
+            method = 'fapiPrivateGetUserTrades'
         request = {
             'symbol': market['id'],
         }
@@ -873,8 +1024,9 @@ class binance(Exchange):
             request['startTime'] = since
         if limit is not None:
             request['limit'] = limit
-        response = await self.privateGetMyTrades(self.extend(request, params))
+        response = await getattr(self, method)(self.extend(request, params))
         #
+        # spot trade
         #     [
         #         {
         #             "symbol": "BNBBTC",
@@ -891,11 +1043,32 @@ class binance(Exchange):
         #         }
         #     ]
         #
+        # futures trade
+        #
+        #     [
+        #         {
+        #             "accountId": 20,
+        #             "buyer": False,
+        #             "commission": "-0.07819010",
+        #             "commissionAsset": "USDT",
+        #             "counterPartyId": 653,
+        #             "id": 698759,
+        #             "maker": False,
+        #             "orderId": 25851813,
+        #             "price": "7819.01",
+        #             "qty": "0.002",
+        #             "quoteQty": "0.01563",
+        #             "realizedPnl": "-0.91539999",
+        #             "side": "SELL",
+        #             "symbol": "BTCUSDT",
+        #             "time": 1569514978020
+        #         }
+        #     ]
         return self.parse_trades(response, market, since, limit)
 
     async def fetch_my_dust_trades(self, symbol=None, since=None, limit=None, params={}):
         #
-        # Bianance provides an opportunity to trade insignificant(i.e. non-tradable and non-withdrawable)
+        # Binance provides an opportunity to trade insignificant(i.e. non-tradable and non-withdrawable)
         # token leftovers(of any asset) into `BNB` coin which in turn can be used to pay trading fees with it.
         # The corresponding trades history is called the `Dust Log` and can be requested via the following end-point:
         # https://github.com/binance-exchange/binance-official-api-docs/blob/master/wapi-api.md#dustlog-user_data
