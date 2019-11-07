@@ -165,6 +165,7 @@ class binance extends Exchange {
                         'balance',
                         'positionRisk',
                         'userTrades',
+                        'income',
                     ),
                     'post' => array (
                         'order',
