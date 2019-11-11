@@ -13,6 +13,7 @@ from ccxt.base.errors import ArgumentsRequired
 from ccxt.base.errors import InsufficientFunds
 from ccxt.base.errors import InvalidOrder
 from ccxt.base.errors import OrderNotFound
+from ccxt.base.errors import DDoSProtection
 
 
 class p2pb2b(Exchange):
@@ -117,8 +118,10 @@ class p2pb2b(Exchange):
                 'Balance not enough': InsufficientFunds,
                 'amount is less than': InvalidOrder,
                 'Total is less than': InvalidOrder,
+                'validation.total': InvalidOrder,
                 'Order not found': OrderNotFound,
                 'Unauthorized request.': AuthenticationError,
+                'Too many requests': DDoSProtection,
             },
         })
 
@@ -368,11 +371,12 @@ class p2pb2b(Exchange):
                 success = self.safe_value(response, 'success', True)
                 errorMessage = self.safe_value(response, 'message', [[]])
                 if not success and errorMessage:
+                    message = ''
                     if isinstance(errorMessage, list):
                         message = str(errorMessage)
-                        raise ExchangeError(self.id + ' Error ' + message)
-                    messageKey = list(errorMessage.keys())[0]
-                    message = errorMessage[messageKey][0]
+                    else:
+                        messageKey = list(errorMessage.keys())[0]
+                        message = errorMessage[messageKey][0]
                     exceptionMessages = list(self.exceptions.keys())
                     for i in range(0, len(exceptionMessages)):
                         exceptionMessage = exceptionMessages[i]
