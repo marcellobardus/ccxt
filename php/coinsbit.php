@@ -72,7 +72,9 @@ class coinsbit extends Exchange {
                 'balance not enough' => '\\ccxt\\InsufficientFunds',
                 'amount is less than' => '\\ccxt\\InvalidOrder',
                 'Total is less than' => '\\ccxt\\InvalidOrder',
+                'validation.total' => '\\ccxt\\InvalidOrder',
                 'This action is unauthorized.' => '\\ccxt\\AuthenticationError',
+                'Too many requests' => '\\ccxt\\DDoSProtection',
             ),
         ));
     }
@@ -352,12 +354,13 @@ class coinsbit extends Exchange {
                 $success = $this->safe_value($response, 'success', true);
                 $errorMessage = $this->safe_value($response, 'message', [array()]);
                 if (!$success && $errorMessage) {
+                    $message = '';
                     if (gettype ($errorMessage) === 'array' && count (array_filter (array_keys ($errorMessage), 'is_string')) == 0) {
                         $message = (string) $errorMessage;
-                        throw new ExchangeError($this->id . ' Error ' . $message);
+                    } else {
+                        $messageKey = is_array($errorMessage) ? array_keys($errorMessage) : array()[0];
+                        $message = $errorMessage[$messageKey][0];
                     }
-                    $messageKey = is_array($errorMessage) ? array_keys($errorMessage) : array()[0];
-                    $message = $errorMessage[$messageKey][0];
                     $exceptionMessages = is_array($this->exceptions) ? array_keys($this->exceptions) : array();
                     for ($i = 0; $i < count ($exceptionMessages); $i++) {
                         $exceptionMessage = $exceptionMessages[$i];
