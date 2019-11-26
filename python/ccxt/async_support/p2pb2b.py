@@ -238,7 +238,7 @@ class p2pb2b(Exchange):
             request['limit'] = limit
         response = await self.privatePostOrders(self.extend(request, params))
         result = self.safe_value(response, 'result')
-        return self.parse_orders(self.safe_value(result, 'result'), market, since, limit)
+        return self.parse_orders(result, market, since, limit)
 
     async def fetch_order(self, id, symbol=None, params={}):
         await self.load_markets()

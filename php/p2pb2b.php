@@ -238,7 +238,7 @@ class p2pb2b extends Exchange {
         }
         $response = $this->privatePostOrders (array_merge ($request, $params));
         $result = $this->safe_value($response, 'result');
-        return $this->parse_orders($this->safe_value($result, 'result'), $market, $since, $limit);
+        return $this->parse_orders($result, $market, $since, $limit);
     }
 
     public function fetch_order ($id, $symbol = null, $params = array ()) {
