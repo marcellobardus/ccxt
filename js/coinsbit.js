@@ -72,8 +72,8 @@ module.exports = class coinsbit extends Exchange {
                 'amount is less than': InvalidOrder,
                 'Total is less than': InvalidOrder,
                 'validation.total': InvalidOrder,
-                'This action is unauthorized.': AuthenticationError,
                 'Too many requests': DDoSProtection,
+                'This action is unauthorized.': AuthenticationError,
             },
         });
     }
@@ -199,7 +199,7 @@ module.exports = class coinsbit extends Exchange {
         }
         const response = await this.privatePostOrders (this.extend (request, params));
         const result = this.safeValue (response, 'result');
-        return this.parseOrders (this.safeValue (result, 'result'), market, since, limit);
+        return this.parseOrders (result, market, since, limit);
     }
 
     async fetchOrder (id, symbol = undefined, params = {}) {
