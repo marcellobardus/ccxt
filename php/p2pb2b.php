@@ -22,6 +22,7 @@ class p2pb2b extends Exchange {
                 'fetchOrders' => false,
                 'fetchOpenOrders' => true,
                 'fetchCurrencies' => false,
+                'fetchL2OrderBook' => false,
                 'fetchTicker' => true,
                 'fetchTickers' => false,
                 'fetchOHLCV' => false,
@@ -200,7 +201,7 @@ class p2pb2b extends Exchange {
         );
     }
 
-    public function create_order ($symbol, $type, $side, $amount, $price = null, $params = array ()) {
+    public function create_order ($symbol, $_type, $side, $amount, $price = null, $params = array ()) {
         $this->load_markets();
         $market = $this->market ($symbol);
         $method = 'privatePostOrderNew';
@@ -251,6 +252,24 @@ class p2pb2b extends Exchange {
             throw new OrderNotFound($this->id . ' order ' . $id . ' not found');
         }
         return $this->parse_order($response['result']['records']);
+    }
+
+    public function fetch_l2_order_book ($symbol, $limit = null, $params = array ()) {
+        if ($params['side'] === null) {
+            throw new ArgumentsRequired($this->id . ' fetchL2OrderBook requires a side argument');
+        }
+        $this->load_markets();
+        $request = array (
+            'market' => $this->market_id($symbol),
+            'side' => $params['side'],
+        );
+        if ($limit !== null) {
+            $request['limit'] = $limit;
+        }
+        $response = $this->publicGetBook (array_merge ($request, $params));
+        $timestamp = $this->safe_value($response, 'cache_time');
+        $orderBook = $this->safe_value($response, 'result');
+        return $this->parse_l2_order_book ($orderBook, $timestamp);
     }
 
     public function fetch_order_book ($symbol, $limit = null, $params = array ()) {
@@ -312,6 +331,39 @@ class p2pb2b extends Exchange {
             );
         }
         return array( 'url' => $url, 'method' => $method, 'body' => $body, 'headers' => $headers );
+    }
+
+    public function parse_l2_order_book ($orderbook, $timestamp = null, $bidsKey = 'bids', $asksKey = 'asks', $priceKey = 0) {
+        $orders = $this->safe_value($orderbook, 'orders');
+        $asks = array();
+        $bids = array();
+        if (strlen ($orders) > 0) {
+            $side = $this->safe_value($orders[0], 'side');
+            $bookMap = array();
+            $book = array();
+            for ($i = 0; $i < count ($orders); $i++) {
+                $price = $this->safe_float($orders[$i], 'price');
+                $amount = $this->safe_float($orders[$i], 'amount');
+                $existingOrderAmount = $bookMap[$price] || 0.0;
+                $bookMap[$price] = $amount . $existingOrderAmount;
+            }
+            for ($i = 0; $i < $bookMap; $i++) {
+                $key = is_array($bookMap) ? array_keys($bookMap) : array()[$i];
+                $book[] = [floatval ($key), $bookMap[$key]];
+            }
+            if ($side === 'buy') {
+                $bids = $this->sort_by($book, $priceKey, true);
+            } else {
+                $asks = $this->sort_by($book, $priceKey);
+            }
+        }
+        return array (
+            'bids' => $bids,
+            'asks' => $asks,
+            'timestamp' => $timestamp,
+            'datetime' => $this->iso8601 ($timestamp),
+            'nonce' => null,
+        );
     }
 
     public function parse_new_order ($order, $market = null) {
@@ -378,7 +430,7 @@ class p2pb2b extends Exchange {
         return 'orderId';
     }
 
-    public function handle_errors ($code, $reason, $url, $method, $headers, $body, $response, $requestHeaders, $requestBody) {
+    public function handle_errors ($code, $_reason, $_url, $_method, $_headers, $body, $response, $requestHeaders, $requestBody) {
         if ($response === null) {
             return;
         }

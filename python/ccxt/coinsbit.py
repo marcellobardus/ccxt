@@ -31,6 +31,7 @@ class coinsbit(Exchange):
                 'fetchOrders': False,
                 'fetchOpenOrders': True,
                 'fetchCurrencies': False,
+                'fetchL2OrderBook': False,
                 'fetchTicker': True,
                 'fetchTickers': False,
                 'fetchOHLCV': False,
@@ -222,6 +223,21 @@ class coinsbit(Exchange):
         response = self.publicGetDepthResult(self.extend(request, params))
         return self.parse_order_book(response, None, 'bids', 'asks')
 
+    def fetch_l2_order_book(self, symbol, limit=None, params={}):
+        if params['side'] is None:
+            raise ArgumentsRequired(self.id + ' fetchL2OrderBook requires a side argument')
+        self.load_markets()
+        request = {
+            'market': self.market_id(symbol),
+            'side': params['side'],
+        }
+        if limit is not None:
+            request['limit'] = limit
+        response = self.publicGetBook(self.extend(request, params))
+        timestamp = self.safe_value(response, 'cache_time')
+        orderBook = self.safe_value(response, 'result')
+        return self.parse_l2_order_book(orderBook, timestamp)
+
     def fetch_balance(self, params={}):
         self.load_markets()
         query = self.omit(params, 'type')
@@ -268,6 +284,34 @@ class coinsbit(Exchange):
 
     def get_order_id_field(self):
         return 'orderId'
+
+    def parse_l2_order_book(self, orderbook, timestamp=None, bidsKey='bids', asksKey='asks', priceKey=0):
+        orders = self.safe_value(orderbook, 'orders')
+        asks = []
+        bids = []
+        if len(orders) > 0:
+            side = self.safe_value(orders[0], 'side')
+            bookMap = {}
+            book = []
+            for i in range(0, len(orders)):
+                price = self.safe_float(orders[i], 'price')
+                amount = self.safe_float(orders[i], 'amount')
+                existingOrderAmount = bookMap[price] or 0.0
+                bookMap[price] = amount + existingOrderAmount
+            for i in range(0, bookMap):
+                key = list(bookMap.keys())[i]
+                book.append([float(key), bookMap[key]])
+            if side == 'buy':
+                bids = self.sort_by(book, priceKey, True)
+            else:
+                asks = self.sort_by(book, priceKey)
+        return {
+            'bids': bids,
+            'asks': asks,
+            'timestamp': timestamp,
+            'datetime': self.iso8601(timestamp),
+            'nonce': None,
+        }
 
     def parse_new_order(self, order, market=None):
         marketName = self.safe_string(order, 'market')
