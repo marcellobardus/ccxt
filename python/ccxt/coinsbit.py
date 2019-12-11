@@ -236,7 +236,7 @@ class coinsbit(Exchange):
         response = self.publicGetBook(self.extend(request, params))
         timestamp = self.safe_value(response, 'cache_time')
         result = self.safe_value(response, 'result')
-        orderBook = self.safe_value(response, 'result', result)
+        orderBook = self.safe_value(result, 'result', result)
         return self.parse_l2_order_book(orderBook, timestamp)
 
     def fetch_balance(self, params={}):

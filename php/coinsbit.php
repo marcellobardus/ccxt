@@ -243,7 +243,7 @@ class coinsbit extends Exchange {
         $response = $this->publicGetBook (array_merge ($request, $params));
         $timestamp = $this->safe_value($response, 'cache_time');
         $result = $this->safe_value($response, 'result');
-        $orderBook = $this->safe_value($response, 'result', $result);
+        $orderBook = $this->safe_value($result, 'result', $result);
         return $this->parse_l2_order_book ($orderBook, $timestamp);
     }
 
