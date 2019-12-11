@@ -298,8 +298,9 @@ class coinsbit(Exchange):
                 amount = self.safe_float(orders[i], 'amount')
                 existingOrderAmount = self.safe_value(bookMap, price, 0.0)
                 bookMap[price] = amount + existingOrderAmount
-            for i in range(0, bookMap):
-                key = list(bookMap.keys())[i]
+            bookPrices = list(bookMap.keys())
+            for i in range(0, len(bookPrices)):
+                key = bookPrices[i]
                 book.append([float(key), bookMap[key]])
             if side == 'buy':
                 bids = self.sort_by(book, priceKey, True)

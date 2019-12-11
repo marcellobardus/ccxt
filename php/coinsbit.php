@@ -313,8 +313,9 @@ class coinsbit extends Exchange {
                 $existingOrderAmount = $this->safe_value($bookMap, $price, 0.0);
                 $bookMap[$price] = $amount . $existingOrderAmount;
             }
-            for ($i = 0; $i < $bookMap; $i++) {
-                $key = is_array($bookMap) ? array_keys($bookMap) : array()[$i];
+            $bookPrices = is_array($bookMap) ? array_keys($bookMap) : array();
+            for ($i = 0; $i < count ($bookPrices); $i++) {
+                $key = $bookPrices[$i];
                 $book[] = [floatval ($key), $bookMap[$key]];
             }
             if ($side === 'buy') {
