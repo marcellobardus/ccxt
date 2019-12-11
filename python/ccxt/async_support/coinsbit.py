@@ -296,7 +296,7 @@ class coinsbit(Exchange):
             for i in range(0, len(orders)):
                 price = self.safe_float(orders[i], 'price')
                 amount = self.safe_float(orders[i], 'amount')
-                existingOrderAmount = bookMap[price] or 0.0
+                existingOrderAmount = self.safe_value(bookMap, price, 0.0)
                 bookMap[price] = amount + existingOrderAmount
             for i in range(0, bookMap):
                 key = list(bookMap.keys())[i]

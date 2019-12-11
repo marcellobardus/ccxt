@@ -344,7 +344,7 @@ class p2pb2b extends Exchange {
             for ($i = 0; $i < count ($orders); $i++) {
                 $price = $this->safe_float($orders[$i], 'price');
                 $amount = $this->safe_float($orders[$i], 'amount');
-                $existingOrderAmount = $bookMap[$price] || 0.0;
+                $existingOrderAmount = $this->safe_value($bookMap, $price, 0.0);
                 $bookMap[$price] = $amount . $existingOrderAmount;
             }
             for ($i = 0; $i < $bookMap; $i++) {
