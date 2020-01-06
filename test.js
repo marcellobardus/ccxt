@@ -52,34 +52,35 @@
 //////////////////////////////////////
 
 
-// // npm run build
-// // node run-tests --js --python coinsbit
-// // python3 python/test/test.py bkex BTC/USD
+// npm run build
+// node run-tests --js --python coinsbit
+// python3 python/test/test.py bkex BTC/USD
 
-// const Bkex = require('./js/bkex.js');
-// const bkex = new Bkex({
-//     'apiKey': 'b1c4b596b9a7fa9edbe74c68b3fdc78cd421583eede8326cca7adfbe3a3737c4',
-//     'secret': 'c0f513b1aee84d1e85dce35b0937c302fe72ec4ef25ea41fe20c892bc4d510ac'
-// });
+const Bkex = require('./js/bkex.js');
+const bkex = new Bkex({
+    'apiKey': '80202aeec8ebc3391cd707fda48ff3c3372dc141543afbf825f311ef316e1315',
+    'secret': 'e911ca4f37ee9839dc9294929e921508e32e98d1e9db23ee2e8e0e51ec95f2fe'
+});
 
-// // const promise = bkex.fetchMarkets();
-// // const promise = bkex.fetchTicker('BTC/USDT');
+// const promise = bkex.fetchMarkets();
+// const promise = bkex.fetchTicker('BTC/USDT');
 // const promise = bkex.fetchOpenOrders('BTC/USDT');
-// // var promise = bkex.createOrder('KSH/BTC', 'limit', 'sell', 2, 0.0000513);
-// // var promise = bkex.createOrder('KSH/BTC', 'limit', 'buy', 2, 0.000001);
-// // var promise = bkex.createOrder('KSH/BTC', 'limit', 'buy', 2, 0.000001);
-// // const promise = bkex.createOrder('ETH/BTC', 'limit', 'buy', 2, 0.00006000);
-// // const promise = bkex.createOrder('ETH/BTC', 'limit', 'sell', 2, 0.00016000);
-// // const promise = bkex.cancelOrder(123213, 'KSH/BTC');
-// // const promise = bkex.cancelOrder("1378511545", 'KSH/BTC');
-// // const promise = bkex.fetchOrder(123213, 'KSH/BTC');
-// // const promise = bkex.fetchOrderBook('BTC/USDT');
-// // const promise = bkex.fetchBalance();
+// var promise = bkex.createOrder('KSH/BTC', 'limit', 'sell', 2, 0.0000513);
+// var promise = bkex.createOrder('KSH/BTC', 'limit', 'buy', 2, 0.000001);
+// var promise = bkex.createOrder('KSH/BTC', 'limit', 'buy', 2, 0.000001);
+ const promise = bkex.createOrder('ETH/BTC', 'limit', 'sell', 0.02, 0.10006000);
+// const promise = bkex.createOrder('ETH/BTC', 'limit', 'sell', 2, 0.00016000);
+// const promise = bkex.cancelOrder(123213, 'KSH/BTC');
+// const promise = bkex.cancelOrder("1378511545", 'KSH/BTC');
+// const promise = bkex.fetchOrder(123213, 'KSH/BTC');
+// const promise = bkex.fetchOrderBook('BTC/USDT');
+ //const promise = bkex.fetchBalance();
 
 
-// promise.then(function(response) {
-//     console.log(response);
-// });
+promise.then(function(response) {
+    console.log(response);
+    //kex.cancelOrder(response.id, 'ETH/BTC');
+});
 
 
 
