@@ -4,6 +4,13 @@
 # https://github.com/ccxt/ccxt/blob/master/CONTRIBUTING.md#how-to-contribute-code
 
 from ccxt.async_support.base.exchange import Exchange
+
+# -----------------------------------------------------------------------------
+
+try:
+    basestring  # Python 3
+except NameError:
+    basestring = str  # Python 2
 import base64
 import hashlib
 import math
@@ -293,6 +300,9 @@ class p2pb2b(Exchange):
             result[currencyId] = account
         return self.parse_balance(result)
 
+    def nonce(self):
+        return self.microseconds() * 1000
+
     def sign(self, path, api='public', method='GET', params={}, headers=None, body=None):
         url = self.urls['api'][api] + '/' + self.implode_params(path, params)
         query = self.omit(params, self.extract_params(path))
@@ -419,6 +429,8 @@ class p2pb2b(Exchange):
                     message = ''
                     if isinstance(errorMessage, list):
                         message = str(errorMessage)
+                    elif isinstance(errorMessage, basestring):
+                        message = errorMessage
                     else:
                         messageKey = list(errorMessage.keys())[0]
                         message = errorMessage[messageKey][0]

@@ -303,6 +303,10 @@ class p2pb2b extends Exchange {
         return $this->parse_balance($result);
     }
 
+    public function nonce () {
+        return $this->microseconds () * 1000;
+    }
+
     public function sign ($path, $api = 'public', $method = 'GET', $params = array (), $headers = null, $body = null) {
         $url = $this->urls['api'][$api] . '/' . $this->implode_params($path, $params);
         $query = $this->omit ($params, $this->extract_params($path));
@@ -443,6 +447,8 @@ class p2pb2b extends Exchange {
                     $message = '';
                     if (gettype ($errorMessage) === 'array' && count (array_filter (array_keys ($errorMessage), 'is_string')) == 0) {
                         $message = (string) $errorMessage;
+                    } else if (gettype ($errorMessage) === 'string') {
+                        $message = $errorMessage;
                     } else {
                         $messageKey = is_array($errorMessage) ? array_keys($errorMessage) : array()[0];
                         $message = $errorMessage[$messageKey][0];
