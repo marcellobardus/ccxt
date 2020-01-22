@@ -249,11 +249,12 @@ class coinsbit(Exchange):
         for i in range(0, len(symbols)):
             currencyId = symbols[i]
             code = self.safe_currency_code(currencyId)
-            balance = balances[code]
-            account = self.account()
-            account['free'] = self.safe_float(balance, 'available')
-            account['total'] = self.safe_float(balance, 'available') + self.safe_float(balance, 'freeze')
-            result[code] = account
+            balance = self.safe_value(balances, code)
+            if balance:
+                account = self.account()
+                account['free'] = self.safe_float(balance, 'available')
+                account['total'] = self.safe_float(balance, 'available') + self.safe_float(balance, 'freeze')
+                result[code] = account
         return self.parse_balance(result)
 
     def sign(self, path, api='public', method='GET', params={}, headers=None, body=None):

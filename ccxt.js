@@ -72,6 +72,7 @@ const exchanges = {
     'bitstamp1':               require ('./js/bitstamp1.js'),
     'bittrex':                 require ('./js/bittrex.js'),
     'bitz':                    require ('./js/bitz.js'),
+    'bkex':                    require ('./js/bkex.js'),
     'bl3p':                    require ('./js/bl3p.js'),
     'bleutrade':               require ('./js/bleutrade.js'),
     'braziliex':               require ('./js/braziliex.js'),

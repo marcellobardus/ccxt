@@ -55,7 +55,7 @@ Full public and private HTTP REST APIs for all exchanges are implemented. WebSoc
 Exchanges
 =========
 
-The ccxt library currently supports the following 127 cryptocurrency exchange markets and trading APIs:
+The ccxt library currently supports the following 128 cryptocurrency exchange markets and trading APIs:
 
 +------------------------+----------------------+----------------------------------------------------------------------------------------------+-------+---------------------------------------------------------------------------------------------------+--------------------+
 |        logo            | id                   | name                                                                                         | ver   | doc                                                                                               | certified          |
@@ -119,6 +119,8 @@ The ccxt library currently supports the following 127 cryptocurrency exchange ma
 | |bittrex|              | bittrex              | `Bittrex <https://bittrex.com>`__                                                            | 1.1   | `API <https://bittrex.github.io/api/>`__                                                          | |CCXT Certified|   |
 +------------------------+----------------------+----------------------------------------------------------------------------------------------+-------+---------------------------------------------------------------------------------------------------+--------------------+
 | |bitz|                 | bitz                 | `Bit-Z <https://u.bit-z.com/register?invite_code=1429193>`__                                 | 2     | `API <https://apidoc.bit-z.com/en/>`__                                                            |                    |
++------------------------+----------------------+----------------------------------------------------------------------------------------------+-------+---------------------------------------------------------------------------------------------------+--------------------+
+| |bkex|                 | bkex                 | `BKEX <https://www.bkex.com>`__                                                              | 1     | `API <https://github.com/bkexexchange/bkex-official-api-docs/blob/master/api_EN.md>`__            |                    |
 +------------------------+----------------------+----------------------------------------------------------------------------------------------+-------+---------------------------------------------------------------------------------------------------+--------------------+
 | |bl3p|                 | bl3p                 | `BL3P <https://bl3p.eu>`__                                                                   | 1     | `API <https://github.com/BitonicNL/bl3p-api/tree/master/docs>`__                                  |                    |
 +------------------------+----------------------+----------------------------------------------------------------------------------------------+-------+---------------------------------------------------------------------------------------------------+--------------------+
@@ -3883,6 +3885,8 @@ Notes
    :target: https://bittrex.com
 .. |bitz| image:: https://user-images.githubusercontent.com/1294454/35862606-4f554f14-0b5d-11e8-957d-35058c504b6f.jpg
    :target: https://u.bit-z.com/register?invite_code=1429193
+.. |bkex| image:: undefined
+   :target: https://www.bkex.com
 .. |bl3p| image:: https://user-images.githubusercontent.com/1294454/28501752-60c21b82-6feb-11e7-818b-055ee6d0e754.jpg
    :target: https://bl3p.eu
 .. |bleutrade| image:: https://user-images.githubusercontent.com/1294454/30303000-b602dbe6-976d-11e7-956d-36c5049c01e7.jpg

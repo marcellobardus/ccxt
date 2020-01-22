@@ -114,6 +114,7 @@ class Exchange {
         'bitstamp1',
         'bittrex',
         'bitz',
+        'bkex',
         'bl3p',
         'bleutrade',
         'braziliex',
