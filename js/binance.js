@@ -34,6 +34,7 @@ module.exports = class binance extends Exchange {
                 'fetchDeposits': true,
                 'fetchWithdrawals': true,
                 'fetchTransactions': false,
+                'cancelAllOrders': true,
             },
             'timeframes': {
                 '1m': '1m',
@@ -173,6 +174,7 @@ module.exports = class binance extends Exchange {
                     ],
                     'delete': [
                         'order',
+                        'allOpenOrders',
                     ],
                 },
                 'v3': {
@@ -220,6 +222,7 @@ module.exports = class binance extends Exchange {
                     'delete': [
                         'orderList', // oco
                         'order',
+                        'openOrders',
                     ],
                 },
             },
@@ -1090,6 +1093,25 @@ module.exports = class binance extends Exchange {
         let method = 'privateDeleteOrder';
         if (marketType === 'futures') {
             method = 'fapiPrivateDeleteOrder';
+        }
+        const response = await this[method] (this.extend (request, params));
+        return this.parseOrder (response);
+    }
+
+    async cancelAllOrders (symbol = undefined, params = {}) {
+        if (symbol === undefined) {
+            throw new ArgumentsRequired ('cancelAllOrders requires a symbol argument');
+        }
+        await this.loadMarkets ();
+        const market = this.market (symbol);
+        const request = {
+            'symbol': market['id'],
+            // 'origClientOrderId': id,
+        };
+        const marketType = this.options['defaultMarket'];
+        let method = 'privateDeleteAllOpenOrders';
+        if (marketType === 'futures') {
+            method = 'fapiPrivateDeleteAllOpensOrders';
         }
         const response = await this[method] (this.extend (request, params));
         return this.parseOrder (response);
