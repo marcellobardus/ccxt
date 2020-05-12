@@ -34,6 +34,7 @@ class binance extends Exchange {
                 'fetchDeposits' => true,
                 'fetchWithdrawals' => true,
                 'fetchTransactions' => false,
+                'cancelAllOrders' => true,
             ),
             'timeframes' => array (
                 '1m' => '1m',
@@ -173,6 +174,7 @@ class binance extends Exchange {
                     ),
                     'delete' => array (
                         'order',
+                        'allOpenOrders',
                     ),
                 ),
                 'v3' => array (
@@ -220,6 +222,7 @@ class binance extends Exchange {
                     'delete' => array (
                         'orderList', // oco
                         'order',
+                        'openOrders',
                     ),
                 ),
             ),
@@ -1090,6 +1093,25 @@ class binance extends Exchange {
         $method = 'privateDeleteOrder';
         if ($marketType === 'futures') {
             $method = 'fapiPrivateDeleteOrder';
+        }
+        $response = $this->$method (array_merge ($request, $params));
+        return $this->parse_order($response);
+    }
+
+    public function cancel_all_orders ($symbol = null, $params = array ()) {
+        if ($symbol === null) {
+            throw new ArgumentsRequired('cancelAllOrders requires a $symbol argument');
+        }
+        $this->load_markets();
+        $market = $this->market ($symbol);
+        $request = array (
+            'symbol' => $market['id'],
+            // 'origClientOrderId' => id,
+        );
+        $marketType = $this->options['defaultMarket'];
+        $method = 'privateDeleteOpenOrders';
+        if ($marketType === 'futures') {
+            $method = 'fapiPrivateDeleteAllOpenOrders';
         }
         $response = $this->$method (array_merge ($request, $params));
         return $this->parse_order($response);

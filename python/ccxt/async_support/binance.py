@@ -46,6 +46,7 @@ class binance(Exchange):
                 'fetchDeposits': True,
                 'fetchWithdrawals': True,
                 'fetchTransactions': False,
+                'cancelAllOrders': True,
             },
             'timeframes': {
                 '1m': '1m',
@@ -185,6 +186,7 @@ class binance(Exchange):
                     ],
                     'delete': [
                         'order',
+                        'allOpenOrders',
                     ],
                 },
                 'v3': {
@@ -232,6 +234,7 @@ class binance(Exchange):
                     'delete': [
                         'orderList',  # oco
                         'order',
+                        'openOrders',
                     ],
                 },
             },
@@ -1006,6 +1009,22 @@ class binance(Exchange):
         method = 'privateDeleteOrder'
         if marketType == 'futures':
             method = 'fapiPrivateDeleteOrder'
+        response = await getattr(self, method)(self.extend(request, params))
+        return self.parse_order(response)
+
+    async def cancel_all_orders(self, symbol=None, params={}):
+        if symbol is None:
+            raise ArgumentsRequired('cancelAllOrders requires a symbol argument')
+        await self.load_markets()
+        market = self.market(symbol)
+        request = {
+            'symbol': market['id'],
+            # 'origClientOrderId': id,
+        }
+        marketType = self.options['defaultMarket']
+        method = 'privateDeleteOpenOrders'
+        if marketType == 'futures':
+            method = 'fapiPrivateDeleteAllOpenOrders'
         response = await getattr(self, method)(self.extend(request, params))
         return self.parse_order(response)
 
